@@ -1,23 +1,72 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, vec, Env, String, Vec};
 
-#[contract]
-pub struct Contract;
+use soroban_sdk::{
+    contract,
+    contractimpl,
+    contracttype,
+    Env,
+};
 
-// This is a sample contract. Replace this placeholder with your own contract logic.
-// A corresponding test example is available in `test.rs`.
-//
-// For comprehensive examples, visit <https://github.com/stellar/soroban-examples>.
-// The repository includes use cases for the Stellar ecosystem, such as data storage on
-// the blockchain, token swaps, liquidity pools, and more.
-//
-// Refer to the official documentation:
-// <https://developers.stellar.org/docs/build/smart-contracts/overview>.
-#[contractimpl]
-impl Contract {
-    pub fn hello(env: Env, to: String) -> Vec<String> {
-        vec![&env, String::from_str(&env, "Hello"), to]
-    }
+#[contracttype]
+pub enum DataKey {
+    YesVotes,
+    NoVotes,
 }
 
-mod test;
+#[contract]
+pub struct VotingContract;
+
+#[contractimpl]
+impl VotingContract {
+
+    pub fn vote_yes(env: Env) {
+        let count: u32 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::YesVotes)
+            .unwrap_or(0);
+
+        env.storage()
+            .persistent()
+            .set(&DataKey::YesVotes, &(count + 1));
+    }
+
+    pub fn vote_no(env: Env) {
+        let count: u32 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::NoVotes)
+            .unwrap_or(0);
+
+        env.storage()
+            .persistent()
+            .set(&DataKey::NoVotes, &(count + 1));
+    }
+
+    pub fn get_results(env: Env) -> (u32, u32) {
+
+        let yes: u32 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::YesVotes)
+            .unwrap_or(0);
+
+        let no: u32 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::NoVotes)
+            .unwrap_or(0);
+
+        (yes, no)
+    }
+
+    pub fn reset(env: Env) {
+        env.storage()
+            .persistent()
+            .set(&DataKey::YesVotes, &0u32);
+
+        env.storage()
+            .persistent()
+            .set(&DataKey::NoVotes, &0u32);
+    }
+}
