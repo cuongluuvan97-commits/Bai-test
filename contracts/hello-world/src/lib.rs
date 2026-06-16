@@ -19,6 +19,7 @@ pub struct VotingContract;
 #[contractimpl]
 impl VotingContract {
 
+    // Vote YES
     pub fn vote_yes(env: Env) {
         let count: u32 = env
             .storage()
@@ -31,6 +32,7 @@ impl VotingContract {
             .set(&DataKey::YesVotes, &(count + 1));
     }
 
+    // Vote NO
     pub fn vote_no(env: Env) {
         let count: u32 = env
             .storage()
@@ -43,6 +45,7 @@ impl VotingContract {
             .set(&DataKey::NoVotes, &(count + 1));
     }
 
+    // Get voting results
     pub fn get_results(env: Env) -> (u32, u32) {
 
         let yes: u32 = env
@@ -60,7 +63,9 @@ impl VotingContract {
         (yes, no)
     }
 
+    // Reset all votes
     pub fn reset(env: Env) {
+
         env.storage()
             .persistent()
             .set(&DataKey::YesVotes, &0u32);
